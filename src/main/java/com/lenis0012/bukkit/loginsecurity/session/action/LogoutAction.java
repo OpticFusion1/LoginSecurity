@@ -11,7 +11,7 @@ public class LogoutAction extends AuthAction {
 
     @Override
     public AuthMode run(PlayerSession session, ActionResponse response) {
-        if(session.getPlayer() != null) {
+        if (session.getPlayer() != null) {
             // Reset login time to prevent immediately getting kicked
             MetaData.set(session.getPlayer(), "ls_login_time", System.currentTimeMillis());
         }

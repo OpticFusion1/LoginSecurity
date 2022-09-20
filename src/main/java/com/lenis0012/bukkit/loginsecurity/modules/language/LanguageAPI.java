@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 public class LanguageAPI {
+
     private static final String API_BASEPOINT = "http://lang.lenis0012.com";
     private static final String API_LIST = "/list";
     private static final String API_LANGUAGE = "/language/%s";
@@ -23,13 +24,13 @@ public class LanguageAPI {
     private final JsonParser parser = new JsonParser();
 
     public List<Language> getLanguages() throws IOException {
-        if(!languages.isEmpty()) {
+        if (!languages.isEmpty()) {
             return Collections.unmodifiableList(languages);
         }
 
         JsonObject response = apiRequest(API_LIST);
         JsonArray languages = response.get("languages").getAsJsonArray();
-        for(int i = 0; i < languages.size(); i++) {
+        for (int i = 0; i < languages.size(); i++) {
             JsonObject json = languages.get(i).getAsJsonObject();
             Language language = new Language(json);
             this.languages.add(language);
@@ -45,7 +46,7 @@ public class LanguageAPI {
 
     public Translation getTranslation(String code, Translation fallback) throws IOException {
         JsonObject response = apiRequest(API_LANGUAGE, code);
-        if(!response.get("success").getAsBoolean()) {
+        if (!response.get("success").getAsBoolean()) {
             throw new IOException(response.get("error").getAsString());
         }
         return new Translation(fallback, response.get("data").getAsJsonObject(), code);
@@ -63,20 +64,22 @@ public class LanguageAPI {
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"));
             String line;
             StringBuilder builder = new StringBuilder();
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 builder.append(line);
             }
             return parser.parse(builder.toString()).getAsJsonObject();
         } finally {
-            if(reader != null) {
+            if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
     }
 
     public static class Language {
+
         private final String code;
         private final String name;
         private final String authors;

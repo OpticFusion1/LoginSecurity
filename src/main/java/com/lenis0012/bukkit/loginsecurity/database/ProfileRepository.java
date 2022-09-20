@@ -3,16 +3,23 @@ package com.lenis0012.bukkit.loginsecurity.database;
 import com.lenis0012.bukkit.loginsecurity.LoginSecurity;
 import com.lenis0012.bukkit.loginsecurity.storage.PlayerProfile;
 import com.lenis0012.bukkit.loginsecurity.util.UserIdMode;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import org.bukkit.Bukkit;
-
 import javax.sql.DataSource;
-import java.sql.*;
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ProfileRepository {
+
     private final LoginSecurity loginSecurity;
     private final DataSource dataSource;
 
@@ -33,15 +40,15 @@ public class ProfileRepository {
     }
 
     public void insertBlocking(PlayerProfile profile) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO ls_players(uuid_mode,unique_user_id,last_name,ip_address,password,hashing_algorithm,location_id,inventory_id,last_login,registration_date,optlock) VALUES(?,?,?,?,?,?,?,?,?,?,?);",
                     Statement.RETURN_GENERATED_KEYS)) {
                 prepareInsert(statement, profile);
                 statement.executeUpdate();
 
-                try(ResultSet keys = statement.getGeneratedKeys()) {
-                    if(!keys.next()) {
+                try (ResultSet keys = statement.getGeneratedKeys()) {
+                    if (!keys.next()) {
                         throw new RuntimeException("No keys were returned after insert");
                     }
                     profile.setId(keys.getInt(1));
@@ -62,8 +69,8 @@ public class ProfileRepository {
     }
 
     public void updateBlocking(PlayerProfile profile) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "UPDATE ls_players SET last_name=?,ip_address=?,password=?,hashing_algorithm=?,location_id=?,inventory_id=?,last_login=?,optlock=? WHERE id=?;")) {
 
                 prepareUpdate(statement, profile);
@@ -84,8 +91,8 @@ public class ProfileRepository {
     }
 
     public void deleteBlocking(PlayerProfile profile) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "DELETE FROM ls_players WHERE id=?;")) {
                 statement.setInt(1, profile.getId());
                 statement.executeUpdate();
@@ -105,12 +112,12 @@ public class ProfileRepository {
     }
 
     public PlayerProfile findByUniqueUserIdBlocking(UUID uniqueId) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT * FROM ls_players WHERE unique_user_id=?")) {
                 statement.setString(1, uniqueId.toString());
-                try(ResultSet result = statement.executeQuery()) {
-                    if(!result.next()) {
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
                         return null; // Not found
                     }
 
@@ -132,12 +139,12 @@ public class ProfileRepository {
     }
 
     public PlayerProfile findByLastNameBlocking(String lastName) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT * FROM ls_players WHERE last_name=?;")) {
                 statement.setString(1, lastName);
-                try(ResultSet result = statement.executeQuery()) {
-                    if(!result.next()) {
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
                         return null;
                     }
 
@@ -148,10 +155,10 @@ public class ProfileRepository {
     }
 
     public void iterateAllBlocking(SQLConsumer<PlayerProfile> consumer) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(Statement statement = connection.createStatement()) {
-                try(ResultSet result = statement.executeQuery("SELECT * FROM ls_players;")) {
-                    while(result.next()) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet result = statement.executeQuery("SELECT * FROM ls_players;")) {
+                    while (result.next()) {
                         consumer.accept(parseResultSet(result));
                     }
                 }
@@ -160,21 +167,23 @@ public class ProfileRepository {
     }
 
     public void batchInsert(SQLConsumer<SQLConsumer<PlayerProfile>> callback) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement("INSERT INTO ls_players(uuid_mode,unique_user_id,last_name,ip_address,password,hashing_algorithm,location_id,inventory_id,last_login,registration_date,optlock) VALUES(?,?,?,?,?,?,?,?,?,?,?);")) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("INSERT INTO ls_players(uuid_mode,unique_user_id,last_name,ip_address,password,hashing_algorithm,location_id,inventory_id,last_login,registration_date,optlock) VALUES(?,?,?,?,?,?,?,?,?,?,?);")) {
                 final AtomicInteger currentBatchSize = new AtomicInteger();
                 callback.accept(profile -> {
                     prepareInsert(statement, profile);
                     statement.addBatch();
 
                     // execute batch if size is >= BATCH_SIZE
-                    if(currentBatchSize.incrementAndGet() >= LoginSecurityDatabase.BATCH_SIZE) {
+                    if (currentBatchSize.incrementAndGet() >= LoginSecurityDatabase.BATCH_SIZE) {
                         statement.executeBatch();
                         currentBatchSize.set(0);
                     }
                 });
                 // execute batch
-                if(currentBatchSize.get() > 0) statement.executeBatch();
+                if (currentBatchSize.get() > 0) {
+                    statement.executeBatch();
+                }
             }
         }
     }
@@ -187,10 +196,16 @@ public class ProfileRepository {
         statement.setString(5, profile.getPassword());
         statement.setInt(6, profile.getHashingAlgorithm());
 
-        if(profile.getLoginLocationId() == null) statement.setNull(7, Types.INTEGER);
-        else statement.setInt(7, profile.getLoginLocationId());
-        if(profile.getInventoryId() == null) statement.setNull(8, Types.INTEGER);
-        else statement.setInt(8, profile.getInventoryId());
+        if (profile.getLoginLocationId() == null) {
+            statement.setNull(7, Types.INTEGER);
+        } else {
+            statement.setInt(7, profile.getLoginLocationId());
+        }
+        if (profile.getInventoryId() == null) {
+            statement.setNull(8, Types.INTEGER);
+        } else {
+            statement.setInt(8, profile.getInventoryId());
+        }
 
         statement.setTimestamp(9, Timestamp.from(Instant.now()));
         statement.setDate(10, new Date(System.currentTimeMillis()));
@@ -203,10 +218,16 @@ public class ProfileRepository {
         statement.setString(3, profile.getPassword());
         statement.setInt(4, profile.getHashingAlgorithm());
 
-        if(profile.getLoginLocationId() == null) statement.setNull(5, Types.INTEGER);
-        else statement.setInt(5, profile.getLoginLocationId());
-        if(profile.getInventoryId() == null) statement.setNull(6, Types.INTEGER);
-        else statement.setInt(6, profile.getInventoryId());
+        if (profile.getLoginLocationId() == null) {
+            statement.setNull(5, Types.INTEGER);
+        } else {
+            statement.setInt(5, profile.getLoginLocationId());
+        }
+        if (profile.getInventoryId() == null) {
+            statement.setNull(6, Types.INTEGER);
+        } else {
+            statement.setInt(6, profile.getInventoryId());
+        }
 
         statement.setTimestamp(7, Timestamp.from(Instant.now()));
         statement.setLong(8, profile.getVersion() + 1);
@@ -233,12 +254,12 @@ public class ProfileRepository {
     }
 
     private <T> void resolveResult(Consumer<AsyncResult<T>> callback, T result) {
-        Bukkit.getScheduler().runTask(loginSecurity, () ->
-                callback.accept(new AsyncResult<T>(true, result, null)));
+        Bukkit.getScheduler().runTask(loginSecurity, ()
+                -> callback.accept(new AsyncResult<T>(true, result, null)));
     }
 
     private <T> void resolveError(Consumer<AsyncResult<T>> callback, Exception error) {
-        Bukkit.getScheduler().runTask(loginSecurity, () ->
-                callback.accept(new AsyncResult<T>(false, null, error)));
+        Bukkit.getScheduler().runTask(loginSecurity, ()
+                -> callback.accept(new AsyncResult<T>(false, null, error)));
     }
 }

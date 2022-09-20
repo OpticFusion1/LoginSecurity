@@ -1,6 +1,7 @@
 package com.lenis0012.bukkit.loginsecurity.storage;
 
 public class PlayerInventory {
+
     private int id;
 
     private String helmet;

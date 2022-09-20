@@ -22,6 +22,7 @@ import static com.lenis0012.bukkit.loginsecurity.LoginSecurity.translate;
 import static com.lenis0012.bukkit.loginsecurity.modules.language.LanguageKeys.*;
 
 public class CommandLogin extends Command {
+
     public CommandLogin(LoginSecurity plugin) {
         setMinArgs(1);
         setAllowConsole(false);
@@ -30,17 +31,21 @@ public class CommandLogin extends Command {
     @Override
     public void execute() {
         final PlayerSession session = LoginSecurity.getSessionManager().getPlayerSession(player);
+        if (session.isLoggedIn()) {
+            player.sendMessage("[LoginSecurity] " + translate(ALREADY_LOGGED_IN));
+            return;
+        }
         final String password = getArg(0);
 
         LoginSecurityConfig config = LoginSecurity.getConfiguration();
         int tries = MetaData.incrementAndGet(player, "ls_login_tries");
-        if(tries > config.getMaxLoginTries()) {
+        if (tries > config.getMaxLoginTries()) {
             player.kickPlayer("[LoginSecurity] " + translate(LOGIN_TRIES_EXCEEDED).param("max", config.getMaxLoginTries()).toString());
             return;
         }
 
         // Verify auth mode
-        if(session.getAuthMode() != AuthMode.UNAUTHENTICATED) {
+        if (session.getAuthMode() != AuthMode.UNAUTHENTICATED) {
             reply(false, translate(GENERAL_NOT_AUTHENTICATED));
             return;
         }
@@ -48,7 +53,7 @@ public class CommandLogin extends Command {
         // Retrieve profile data
         final PlayerProfile profile = session.getProfile();
         final Algorithm algorithm = Algorithm.getById(profile.getHashingAlgorithm());
-        if(algorithm == null) {
+        if (algorithm == null) {
             reply(false, translate(GENERAL_UNKNOWN_HASH));
             return;
         }
@@ -57,7 +62,7 @@ public class CommandLogin extends Command {
         final Player player = this.player;
         Bukkit.getScheduler().runTaskAsynchronously(LoginSecurity.getInstance(), () -> {
             final boolean validated = algorithm.check(password, profile.getPassword());
-            if(!validated) {
+            if (!validated) {
                 reply(player, false, translate(LOGIN_FAIL));
                 return;
             }
@@ -66,14 +71,14 @@ public class CommandLogin extends Command {
             final AuthAction action = new LoginAction(AuthService.PLAYER, player);
             final ActionResponse response = session.performAction(action);
 
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 reply(player, false, response.getErrorMessage());
                 return;
             }
             reply(player, true, translate(LOGIN_SUCCESS));
 
             // Re-hash if algorithm deprecated
-            if(algorithm.isDeprecated()) {
+            if (algorithm.isDeprecated()) {
                 LoginSecurity.getInstance().getLogger().log(Level.INFO, "Migrating password for user " + player.getName());
                 ChangePassAction changePassAction = new ChangePassAction(AuthService.PLUGIN, LoginSecurity.getInstance(), password);
                 session.performActionAsync(changePassAction, (r) -> LoginSecurity.getInstance().getLogger().log(Level.INFO, "Password migration successfully finished for " + player.getName()));

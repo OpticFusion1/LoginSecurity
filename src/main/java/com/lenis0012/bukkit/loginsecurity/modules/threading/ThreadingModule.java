@@ -25,6 +25,7 @@ import static com.lenis0012.bukkit.loginsecurity.LoginSecurity.translate;
 import static com.lenis0012.bukkit.loginsecurity.modules.language.LanguageKeys.SESSION_CONTINUE;
 
 public class ThreadingModule extends Module<LoginSecurity> implements Listener {
+
     private Cache<UUID, Long> sessionCache;
     private TimeoutTask timeout;
     private MessageTask message;
@@ -66,7 +67,7 @@ public class ThreadingModule extends Module<LoginSecurity> implements Listener {
         final PlayerSession session = LoginSecurity.getSessionManager().getPlayerSession(player);
         MetaData.unset(player, "ls_last_message");
         MetaData.unset(player, "ls_login_time");
-        if(session.isLoggedIn()) {
+        if (session.isLoggedIn()) {
             sessionCache.put(ProfileUtil.getUUID(player), System.currentTimeMillis());
         }
     }
@@ -77,7 +78,7 @@ public class ThreadingModule extends Module<LoginSecurity> implements Listener {
         final UUID profileId = ProfileUtil.getUUID(player);
         final Long sessionTime = sessionCache.getIfPresent(profileId);
         MetaData.set(player, "ls_login_time", System.currentTimeMillis());
-        if(sessionTime == null) {
+        if (sessionTime == null) {
             return;
         }
 
@@ -86,7 +87,7 @@ public class ThreadingModule extends Module<LoginSecurity> implements Listener {
         // Ip check
         final String ipAddress = player.getAddress().getAddress().toString();
         final PlayerSession session = LoginSecurity.getSessionManager().getPlayerSession(player);
-        if(!ipAddress.equals(session.getProfile().getIpAddress())) {
+        if (!ipAddress.equals(session.getProfile().getIpAddress())) {
             // Invalid IP
             return;
         }
@@ -94,7 +95,7 @@ public class ThreadingModule extends Module<LoginSecurity> implements Listener {
         // Allow log in once
         final int seconds = (int) ((System.currentTimeMillis() - lastLogout) / 1000L);
         session.performActionAsync(new LoginAction(AuthService.SESSION, plugin), response -> {
-            if(response.isSuccess()) {
+            if (response.isSuccess()) {
                 player.sendMessage(translate(SESSION_CONTINUE).param("sec", seconds).toString());
             }
         });

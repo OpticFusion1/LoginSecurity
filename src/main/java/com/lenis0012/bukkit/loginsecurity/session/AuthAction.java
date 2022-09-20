@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 public abstract class AuthAction {
+
     private final AuthActionType type;
     private final AuthService service;
     private final Object serviceProvider;
@@ -49,11 +50,11 @@ public abstract class AuthAction {
         final PlayerProfile profile = session.getProfile();
 
         Bukkit.getScheduler().runTask(LoginSecurity.getInstance(), () -> player.removePotionEffect(PotionEffectType.BLINDNESS));
-        if(profile.getInventoryId() != null) {
+        if (profile.getInventoryId() != null) {
             try {
                 final PlayerInventory serializedInventory = LoginSecurity.getDatastore().getInventoryRepository()
                         .findByIdBlocking(profile.getInventoryId());
-                if(serializedInventory != null) {
+                if (serializedInventory != null) {
                     Bukkit.getScheduler().runTask(LoginSecurity.getInstance(), () -> {
                         InventorySerializer.deserializeInventory(serializedInventory, player.getInventory());
                         profile.setInventoryId(null);
@@ -70,9 +71,9 @@ public abstract class AuthAction {
             }
         }
 
-        if(profile.getLoginLocationId() != null) {
+        if (profile.getLoginLocationId() != null) {
             try {
-                final PlayerLocation serializedLocation = LoginSecurity.getDatastore().getLocationRepository()
+                PlayerLocation serializedLocation = LoginSecurity.getDatastore().getLocationRepository()
                         .findByIdBlocking(profile.getLoginLocationId());
                 Bukkit.getScheduler().runTask(LoginSecurity.getInstance(), () -> {
                     player.teleport(serializedLocation.asLocation());
@@ -80,7 +81,7 @@ public abstract class AuthAction {
                     session.saveProfileAsync();
                     // TODO: Delete location
                 });
-                if(serializedLocation != null) {
+                if (serializedLocation != null) {
                     LoginSecurity.getInstance().getLogger().log(Level.WARNING, "Couldn't find player's login location");
                     profile.setLoginLocationId(null);
                     session.saveProfileAsync();
@@ -90,7 +91,7 @@ public abstract class AuthAction {
             }
         }
 
-        if(LoginSecurity.getConfiguration().isHideInventory()) {
+        if (LoginSecurity.getConfiguration().isHideInventory()) {
             Bukkit.getScheduler().runTask(LoginSecurity.getInstance(), player::updateInventory);
         }
 

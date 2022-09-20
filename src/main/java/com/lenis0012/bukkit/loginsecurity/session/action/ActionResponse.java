@@ -1,6 +1,7 @@
 package com.lenis0012.bukkit.loginsecurity.session.action;
 
 public class ActionResponse {
+
     private boolean success;
     private String errorMessage;
 

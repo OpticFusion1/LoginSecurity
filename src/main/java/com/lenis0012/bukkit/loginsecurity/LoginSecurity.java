@@ -1,7 +1,7 @@
 package com.lenis0012.bukkit.loginsecurity;
 
 import com.lenis0012.bukkit.loginsecurity.database.LoginSecurityDatabase;
-import com.lenis0012.bukkit.loginsecurity.modules.captcha.CaptchaManager;
+//import com.lenis0012.bukkit.loginsecurity.modules.captcha.CaptchaManager;
 import com.lenis0012.bukkit.loginsecurity.modules.general.GeneralModule;
 import com.lenis0012.bukkit.loginsecurity.modules.language.LanguageKeys;
 import com.lenis0012.bukkit.loginsecurity.modules.language.LanguageModule;
@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
 public class LoginSecurity extends PluginHolder {
+
     private static final ExecutorService executorService = Executors.newCachedThreadPool();
 
     /**
@@ -48,7 +49,9 @@ public class LoginSecurity extends PluginHolder {
         return ((LoginSecurity) getInstance()).config();
     }
 
-    public static LoginSecurityDatabase getDatastore() { return ((LoginSecurity) getInstance()).datastore(); }
+    public static LoginSecurityDatabase getDatastore() {
+        return ((LoginSecurity) getInstance()).datastore();
+    }
 
     /**
      * Translate a message by key.
@@ -97,8 +100,7 @@ public class LoginSecurity extends PluginHolder {
                 LanguageModule.class,
                 NewStorageModule.class,
                 GeneralModule.class,
-                ThreadingModule.class,
-                CaptchaManager.class);
+                ThreadingModule.class);
     }
 
     @Override

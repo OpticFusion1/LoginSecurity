@@ -1,6 +1,7 @@
 package com.lenis0012.bukkit.loginsecurity.modules.language;
 
 public class TranslatedMessage {
+
     private String message;
 
     public TranslatedMessage(String message) {
@@ -8,7 +9,9 @@ public class TranslatedMessage {
     }
 
     public TranslatedMessage param(String key, Object value) {
-        if(message == null) return this;
+        if (message == null) {
+            return this;
+        }
         message = message.replace("%" + key + "%", value.toString());
         return this;
     }

@@ -2,7 +2,7 @@ package com.lenis0012.bukkit.loginsecurity.commands;
 
 import com.lenis0012.bukkit.loginsecurity.LoginSecurity;
 import com.lenis0012.bukkit.loginsecurity.LoginSecurityConfig;
-import com.lenis0012.bukkit.loginsecurity.modules.captcha.CaptchaManager;
+//import com.lenis0012.bukkit.loginsecurity.modules.captcha.CaptchaManager;
 import com.lenis0012.bukkit.loginsecurity.session.AuthAction;
 import com.lenis0012.bukkit.loginsecurity.session.AuthService;
 import com.lenis0012.bukkit.loginsecurity.session.PlayerSession;
@@ -13,15 +13,17 @@ import com.lenis0012.pluginutils.modules.command.Command;
 import org.bukkit.entity.Player;
 
 import static com.lenis0012.bukkit.loginsecurity.LoginSecurity.translate;
+import optic_fusion1.loginsecurity.captcha.Captcha;
 import static com.lenis0012.bukkit.loginsecurity.modules.language.LanguageKeys.*;
 
 public class CommandRegister extends Command {
+
     private final LoginSecurity plugin;
 
     public CommandRegister(LoginSecurity plugin) {
         this.plugin = plugin;
         setAllowConsole(false);
-        if(plugin.config().isRegisterConfirmPassword()) {
+        if (plugin.config().isRegisterConfirmPassword()) {
             setMinArgs(2);
         } else {
             setMinArgs(1);
@@ -34,27 +36,29 @@ public class CommandRegister extends Command {
         final String password = getArg(0);
 
         LoginSecurityConfig config = LoginSecurity.getConfiguration();
-        if(password.length() < config.getPasswordMinLength() || password.length() > config.getPasswordMaxLength()) {
+        if (password.length() < config.getPasswordMinLength() || password.length() > config.getPasswordMaxLength()) {
             reply(false, translate(GENERAL_PASSWORD_LENGTH).param("min", config.getPasswordMinLength()).param("max", config.getPasswordMaxLength()));
             return;
         }
 
-        if(session.isRegistered()) {
+        if (session.isRegistered()) {
             reply(false, translate(REGISTER_ALREADY));
             return;
         }
 
-        if(config.isRegisterConfirmPassword() && !password.equals(getArg(1))) {
+        if (config.isRegisterConfirmPassword() && !password.equals(getArg(1))) {
             reply(false, translate(ERROR_MATCH_PASSWORD));
             return;
         }
 
-        if(config.isRegisterCaptcha()) {
-            CaptchaManager captcha = plugin.getModule(CaptchaManager.class);
-            captcha.giveMapItem(player, () -> {
-                AuthAction action = new RegisterAction(AuthService.PLAYER, player, password);
-                session.performActionAsync(action, new RegisterCallback(CommandRegister.this, player));
-            });
+        if (!config.isAllowUsernameAsPassword() && player.getName().equalsIgnoreCase(password)) {
+            reply(false, translate(ERROR_PASSWORD_SAME_AS_USERNAME));
+            return;
+        }
+
+        if (config.isRegisterCaptcha()) {
+            Captcha captcha = new Captcha(plugin, player.getUniqueId(), password, session);
+            captcha.getGenerator().generateCaptcha(player);
             reply(true, translate(REGISTER_CAPTCHA));
         } else {
             AuthAction action = new RegisterAction(AuthService.PLAYER, player, password);
@@ -63,6 +67,7 @@ public class CommandRegister extends Command {
     }
 
     private static final class RegisterCallback implements ActionCallback {
+
         private final CommandRegister command;
         private final Player player;
 
@@ -73,7 +78,7 @@ public class CommandRegister extends Command {
 
         @Override
         public void call(ActionResponse response) {
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 command.reply(player, false, response.getErrorMessage());
                 return;
             }

@@ -3,6 +3,7 @@ package com.lenis0012.bukkit.loginsecurity.hashing.xauth;
 import com.lenis0012.bukkit.loginsecurity.hashing.BasicAlgorithm;
 
 public class xAuthAlgorithm extends BasicAlgorithm {
+
     private final boolean salted;
 
     public xAuthAlgorithm(boolean salted) {

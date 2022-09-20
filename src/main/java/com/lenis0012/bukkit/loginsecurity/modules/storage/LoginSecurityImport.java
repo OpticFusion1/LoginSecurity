@@ -14,6 +14,7 @@ import java.io.File;
 import java.sql.SQLException;
 
 public class LoginSecurityImport implements StorageImport {
+
     private final LoginSecurity loginSecurity;
     private final CommandSender sender;
 
@@ -52,7 +53,7 @@ public class LoginSecurityImport implements StorageImport {
     @Override
     public boolean isPossible() {
         final NewStorageModule storageModule = loginSecurity.getModule(NewStorageModule.class);
-        if(storageModule.getPlatform().equalsIgnoreCase("mysql")) {
+        if (storageModule.getPlatform().equalsIgnoreCase("mysql")) {
             return new File(loginSecurity.getDataFolder(), "LoginSecurity.db").exists();
         } else {
             return true; // Wont verify is mysql is valid
@@ -64,7 +65,7 @@ public class LoginSecurityImport implements StorageImport {
     }
 
     private SingleConnectionDataSource createDataSource(NewStorageModule storageModule) {
-        if(storageModule.getPlatform().equalsIgnoreCase("mysql")) {
+        if (storageModule.getPlatform().equalsIgnoreCase("mysql")) {
             return new SingleConnectionDataSource(loginSecurity, storageModule.createSqliteDataSource());
         } else {
             final Configuration configuration = new Configuration(new File(loginSecurity.getDataFolder(), "database.yml"));

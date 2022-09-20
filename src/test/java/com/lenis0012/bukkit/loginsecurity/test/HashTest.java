@@ -14,8 +14,10 @@ public class HashTest {
         String rightPassword = "MojangWasHere";
         String wrongPassword = "mojangWasHere";
 
-        for(Algorithm algorithm : Algorithm.values()) {
-            if(algorithm.isDeprecated()) continue;
+        for (Algorithm algorithm : Algorithm.values()) {
+            if (algorithm.isDeprecated()) {
+                continue;
+            }
             String hashed = algorithm.hash(rightPassword);
             Assert.assertNotEquals("Algorithm " + algorithm.toString() + " did nothing", rightPassword, hashed);
             Assert.assertTrue("Algorithm " + algorithm.toString() + " checked wrongly", algorithm.check(rightPassword, hashed));

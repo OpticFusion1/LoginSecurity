@@ -1,6 +1,7 @@
 package com.lenis0012.bukkit.loginsecurity.session.exceptions;
 
 public class ProfileRefreshException extends Exception {
+
     public ProfileRefreshException() {
         super();
     }

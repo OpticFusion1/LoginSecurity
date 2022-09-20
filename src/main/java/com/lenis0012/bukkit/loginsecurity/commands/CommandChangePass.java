@@ -17,6 +17,7 @@ import static com.lenis0012.bukkit.loginsecurity.LoginSecurity.translate;
 import static com.lenis0012.bukkit.loginsecurity.modules.language.LanguageKeys.*;
 
 public class CommandChangePass extends Command {
+
     private final LoginSecurity plugin;
 
     public CommandChangePass(LoginSecurity plugin) {
@@ -32,14 +33,14 @@ public class CommandChangePass extends Command {
         final String changed = getArg(1);
 
         // Verify auth mode
-        if(!session.isLoggedIn()) {
+        if (!session.isLoggedIn()) {
             reply(false, translate(GENERAL_NOT_LOGGED_IN));
             return;
         }
 
         // Verify new password
         LoginSecurityConfig config = LoginSecurity.getConfiguration();
-        if(changed.length() < config.getPasswordMinLength() || changed.length() > config.getPasswordMaxLength()) {
+        if (changed.length() < config.getPasswordMinLength() || changed.length() > config.getPasswordMaxLength()) {
             reply(false, translate(GENERAL_PASSWORD_LENGTH).param("min", config.getPasswordMinLength()).param("max", config.getPasswordMaxLength()));
             return;
         }
@@ -47,7 +48,7 @@ public class CommandChangePass extends Command {
         // Retrieve profile data
         final PlayerProfile profile = session.getProfile();
         final Algorithm algorithm = Algorithm.getById(profile.getHashingAlgorithm());
-        if(algorithm == null) {
+        if (algorithm == null) {
             reply(false, translate(GENERAL_UNKNOWN_HASH));
             return;
         }
@@ -56,14 +57,14 @@ public class CommandChangePass extends Command {
         final Player player = this.player;
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             final boolean validated = algorithm.check(password, profile.getPassword());
-            if(!validated) {
+            if (!validated) {
                 reply(player, false, translate(CHANGE_FAIL));
                 return;
             }
 
             final AuthAction action = new ChangePassAction(AuthService.PLAYER, player, changed);
             final ActionResponse response = session.performAction(action);
-            if(!response.isSuccess()) {
+            if (!response.isSuccess()) {
                 reply(player, false, response.getErrorMessage());
                 return;
             }

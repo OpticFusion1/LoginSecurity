@@ -11,16 +11,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LoggingFilter extends AbstractFilter {
-    private static final List<String> filteredWords = Arrays.asList("/register", "/login", "/changepassword", "/changepass");
+
+    private static final List<String> filteredWords = Arrays.asList("/register", "/login", "/changepassword", "/changepass", "/unregister", "/l", "/reg");
 
     private Result handle(String message) {
-        if(message == null) {
+        if (message == null) {
             return Result.NEUTRAL;
         }
 
         message = message.toLowerCase();
-        for(String word : filteredWords) {
-            if(message.startsWith(word) || message.contains("issued server command: " + word)) {
+        for (String word : filteredWords) {
+            if (message.startsWith(word) || message.contains("issued server command: " + word)) {
                 return Result.DENY;
             }
         }

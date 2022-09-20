@@ -12,6 +12,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class InventoryRepository {
+
     private final LoginSecurity loginSecurity;
     private final DataSource dataSource;
 
@@ -32,27 +33,27 @@ public class InventoryRepository {
     }
 
     public void insertBlocking(PlayerProfile profile, PlayerInventory inventory) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO ls_inventories(helmet, chestplate, leggings, boots, off_hand, contents) VALUES (?,?,?,?,?,?);",
                     Statement.RETURN_GENERATED_KEYS)) {
 
                 prepareInsert(statement, inventory);
                 statement.executeUpdate();
 
-                try(ResultSet keys = statement.getGeneratedKeys()) {
-                    if(!keys.next()) {
+                try (ResultSet keys = statement.getGeneratedKeys()) {
+                    if (!keys.next()) {
                         throw new RuntimeException("No keys were returned after insert");
                     }
                     inventory.setId(keys.getInt(1));
                 }
             }
             profile.setInventoryId(inventory.getId());
-            try(PreparedStatement statement = connection.prepareStatement(
+            try (PreparedStatement statement = connection.prepareStatement(
                     "UPDATE ls_players SET inventory_id=? WHERE id=?;")) {
                 statement.setInt(1, inventory.getId());
                 statement.setInt(2, profile.getId());
-                if(statement.executeUpdate() < 1) {
+                if (statement.executeUpdate() < 1) {
                     loginSecurity.getLogger().log(Level.WARNING, "Failed to set location id in profile");
                     throw new SQLException("Failed set location id in profile");
                 }
@@ -72,12 +73,12 @@ public class InventoryRepository {
     }
 
     public PlayerInventory findByIdBlocking(int id) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement(
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement(
                     "SELECT * FROM ls_inventories WHERE id=?;")) {
                 statement.setInt(1, id);
-                try(ResultSet result = statement.executeQuery()) {
-                    if(!result.next()) {
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
                         return null; // Not found
                     }
 
@@ -88,10 +89,10 @@ public class InventoryRepository {
     }
 
     public void iterateAllBlocking(SQLConsumer<PlayerInventory> consumer) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(Statement statement = connection.createStatement()) {
-                try(ResultSet result = statement.executeQuery("SELECT * FROM ls_inventories;")) {
-                    while(result.next()) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet result = statement.executeQuery("SELECT * FROM ls_inventories;")) {
+                    while (result.next()) {
                         consumer.accept(parseResultSet(result));
                     }
                 }
@@ -100,21 +101,23 @@ public class InventoryRepository {
     }
 
     public void batchInsert(SQLConsumer<SQLConsumer<PlayerInventory>> callback) throws SQLException {
-        try(Connection connection = dataSource.getConnection()) {
-            try(PreparedStatement statement = connection.prepareStatement("INSERT INTO ls_inventories(helmet, chestplate, leggings, boots, off_hand, contents) VALUES (?,?,?,?,?,?);")) {
+        try (Connection connection = dataSource.getConnection()) {
+            try (PreparedStatement statement = connection.prepareStatement("INSERT INTO ls_inventories(helmet, chestplate, leggings, boots, off_hand, contents) VALUES (?,?,?,?,?,?);")) {
                 final AtomicInteger currentBatchSize = new AtomicInteger();
                 callback.accept(inventory -> {
                     prepareInsert(statement, inventory);
                     statement.addBatch();
 
                     // execute batch if size is >= BATCH_SIZE
-                    if(currentBatchSize.incrementAndGet() >= LoginSecurityDatabase.BATCH_SIZE) {
+                    if (currentBatchSize.incrementAndGet() >= LoginSecurityDatabase.BATCH_SIZE) {
                         statement.executeBatch();
                         currentBatchSize.set(0);
                     }
                 });
                 // execute batch
-                if(currentBatchSize.get() > 0) statement.executeBatch();
+                if (currentBatchSize.get() > 0) {
+                    statement.executeBatch();
+                }
             }
         }
     }
@@ -141,12 +144,12 @@ public class InventoryRepository {
     }
 
     private <T> void resolveResult(Consumer<AsyncResult<T>> callback, T result) {
-        Bukkit.getScheduler().runTask(loginSecurity, () ->
-                callback.accept(new AsyncResult<T>(true, result, null)));
+        Bukkit.getScheduler().runTask(loginSecurity, ()
+                -> callback.accept(new AsyncResult<T>(true, result, null)));
     }
 
     private <T> void resolveError(Consumer<AsyncResult<T>> callback, Exception error) {
-        Bukkit.getScheduler().runTask(loginSecurity, () ->
-                callback.accept(new AsyncResult<T>(false, null, error)));
+        Bukkit.getScheduler().runTask(loginSecurity, ()
+                -> callback.accept(new AsyncResult<T>(false, null, error)));
     }
 }

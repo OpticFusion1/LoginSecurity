@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class RegisterAction extends AuthAction {
+
     private final String password;
 
     public <T> RegisterAction(AuthService<T> service, T serviceProvider, String password) {
@@ -21,7 +22,7 @@ public class RegisterAction extends AuthAction {
     public AuthMode run(PlayerSession session, ActionResponse response) {
         try {
             session.refreshProfile();
-        } catch(ProfileRefreshException e) {
+        } catch (ProfileRefreshException e) {
             response.setSuccess(false);
             response.setErrorMessage("Your account was modified by a third party, please rejoin!");
             return null;

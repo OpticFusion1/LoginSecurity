@@ -36,40 +36,46 @@ public class InventorySerializer {
     }
 
     private static String serialize(Object item) {
-        if(item == null) return null;
+        if (item == null) {
+            return null;
+        }
         ByteArrayOutputStream baos = null;
         try {
             baos = new ByteArrayOutputStream();
             BukkitObjectOutputStream output = new BukkitObjectOutputStream(baos);
             output.writeObject(item);
             return Base64.getEncoder().encodeToString(baos.toByteArray());
-        } catch(IOException e) {
+        } catch (IOException e) {
             LoginSecurity.getInstance().getLogger().log(Level.SEVERE, "Failed to serialize item", e);
             return null;
         } finally {
-            if(baos != null) {
+            if (baos != null) {
                 try {
                     baos.close();
-                } catch(IOException e1) {}
+                } catch (IOException e1) {
+                }
             }
         }
     }
 
     private static Object deserialize(String item) {
-        if(item == null) return null;
+        if (item == null) {
+            return null;
+        }
         BukkitObjectInputStream input = null;
         try {
             byte[] bytes = Base64.getDecoder().decode(item);
             input = new BukkitObjectInputStream(new ByteArrayInputStream(bytes));
             return input.readObject();
-        } catch(Exception e) {
+        } catch (Exception e) {
             LoginSecurity.getInstance().getLogger().log(Level.SEVERE, "Failed to deserialize item", e);
             return null;
         } finally {
-            if(input != null) {
+            if (input != null) {
                 try {
                     input.close();
-                } catch(IOException e1) {}
+                } catch (IOException e1) {
+                }
             }
         }
     }

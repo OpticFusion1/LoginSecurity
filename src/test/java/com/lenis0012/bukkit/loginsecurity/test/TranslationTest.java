@@ -15,7 +15,7 @@ public class TranslationTest {
         InputStream languageResource = TranslationTest.class.getResourceAsStream("/lang/en_us.json");
         Translation translation = new Translation(null, new InputStreamReader(languageResource), "en_us");
 
-        for(LanguageKeys key : LanguageKeys.values()) {
+        for (LanguageKeys key : LanguageKeys.values()) {
             Assert.assertNotNull("Invalid translation key", translation.translate(key.toString()));
         }
     }

@@ -15,13 +15,13 @@ public class LoginAction extends AuthAction {
     public AuthMode run(final PlayerSession session, ActionResponse response) {
         try {
             session.refreshProfile();
-        } catch(ProfileRefreshException e) {
+        } catch (ProfileRefreshException e) {
             response.setSuccess(false);
             response.setErrorMessage("Your account was modified by a third party, please rejoin!");
             return null;
         }
         rehabPlayer(session);
-        if(session.isRegistered()) {
+        if (session.isRegistered()) {
             session.getProfile().setLastLogin(new Timestamp(System.currentTimeMillis()));
             session.getProfile().setIpAddress(session.getPlayer().getAddress().getAddress().toString());
             session.saveProfileAsync();

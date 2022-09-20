@@ -3,6 +3,7 @@ package com.lenis0012.bukkit.loginsecurity.storage;
 import java.sql.Timestamp;
 
 public class Migration {
+
     private int id;
 
     private String version;
@@ -43,7 +44,8 @@ public class Migration {
         this.appliedAt = appliedAt;
     }
 
-    public Migration() {}
+    public Migration() {
+    }
 
     public Migration(String version, String name, Timestamp appliedAt) {
         this.version = version;

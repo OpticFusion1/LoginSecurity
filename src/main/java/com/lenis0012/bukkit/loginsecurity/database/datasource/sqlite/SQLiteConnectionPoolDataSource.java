@@ -27,12 +27,13 @@ public class SQLiteConnectionPoolDataSource extends SQLiteDataSource implements 
     /**
      * Default constructor.
      */
-    public SQLiteConnectionPoolDataSource () {
+    public SQLiteConnectionPoolDataSource() {
         super();
     }
 
     /**
      * Creates a data source based on the provided configuration.
+     *
      * @param config The configuration for the data source.
      */
     public SQLiteConnectionPoolDataSource(SQLiteConfig config) {

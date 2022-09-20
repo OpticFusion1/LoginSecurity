@@ -7,13 +7,14 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class RemovePassAction extends AuthAction {
+
     public <T> RemovePassAction(AuthService<T> service, T serviceProvider) {
         super(AuthActionType.REMOVE_PASSWORD, service, serviceProvider);
     }
 
     @Override
     public AuthMode run(PlayerSession session, ActionResponse response) {
-        if(!session.isRegistered()) {
+        if (!session.isRegistered()) {
             throw new IllegalStateException("User is not registered!");
         }
 

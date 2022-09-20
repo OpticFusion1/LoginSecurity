@@ -8,6 +8,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 public abstract class DataSourceAdapter implements DataSource {
+
     @Override
     public Connection getConnection() throws SQLException {
         throw new SQLFeatureNotSupportedException();

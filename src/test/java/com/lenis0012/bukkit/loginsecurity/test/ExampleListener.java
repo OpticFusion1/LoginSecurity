@@ -13,8 +13,7 @@ import org.bukkit.event.Listener;
 /**
  * An example listener using the LoginSecurity 2.1 API.
  *
- * This listeners makes it so whenever a player logs out using /logout.
- * It doesn't log out but instead deletes their password.
+ * This listeners makes it so whenever a player logs out using /logout. It doesn't log out but instead deletes their password.
  *
  * Pretty useless, but it's just an example.
  */
@@ -23,9 +22,9 @@ public class ExampleListener implements Listener {
     @EventHandler
     public void onAuthAction(AuthActionEvent event) {
         // Check if type is logout
-        if(event.getType() == AuthActionType.LOGOUT) {
+        if (event.getType() == AuthActionType.LOGOUT) {
             // Check if ran by player
-            if(event.getAction().getService() != AuthService.PLAYER) {
+            if (event.getAction().getService() != AuthService.PLAYER) {
                 return;
             }
 

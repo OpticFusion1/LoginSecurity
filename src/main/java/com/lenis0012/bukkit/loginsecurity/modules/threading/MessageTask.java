@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class MessageTask extends BukkitRunnable {
+
     private final LoginSecurity plugin;
     private long messageDelay;
 
@@ -20,17 +21,19 @@ public class MessageTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        for(final Player player : Bukkit.getOnlinePlayers()) {
-            if(!player.isOnline()) continue; // NPC hotfix
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.isOnline()) {
+                continue; // NPC hotfix
+            }
             final PlayerSession session = LoginSecurity.getSessionManager().getPlayerSession(player);
             final AuthMode authMode = session.getAuthMode();
-            if(!authMode.hasAuthMessage()) {
+            if (!authMode.hasAuthMessage()) {
                 // Auth mode does not have login message
                 continue;
             }
 
             final long lastMessage = MetaData.get(player, "ls_last_message", 0L);
-            if(lastMessage + messageDelay > System.currentTimeMillis()) {
+            if (lastMessage + messageDelay > System.currentTimeMillis()) {
                 continue;
             }
 

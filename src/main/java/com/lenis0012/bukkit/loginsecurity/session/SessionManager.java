@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class SessionManager {
+
     private final Map<UUID, PlayerSession> activeSessions = Maps.newConcurrentMap();
     private final LoadingCache<UUID, PlayerSession> preloadCache;
 
@@ -36,13 +37,13 @@ public class SessionManager {
     }
 
     public final PlayerSession getPlayerSession(final Player player) {
-        if(!player.isOnline()) {
+        if (!player.isOnline()) {
             throw new IllegalStateException("Can't retrieve player session from offline player!");
         }
 
         final UUID userId = ProfileUtil.getUUID(player);
         final PlayerSession session;
-        if(activeSessions.containsKey(userId)) {
+        if (activeSessions.containsKey(userId)) {
             session = activeSessions.get(userId);
         } else {
             session = preloadCache.getUnchecked(userId);
@@ -60,9 +61,9 @@ public class SessionManager {
     public final PlayerSession getOfflineSession(final String playerName) {
         try {
             PlayerProfile profile = LoginSecurity.getDatastore().getProfileRepository().findByLastNameBlocking(playerName);
-            if(profile == null) {
+            if (profile == null) {
                 OfflinePlayer offline = Bukkit.getOfflinePlayer(playerName);
-                if(offline == null || offline.getUniqueId() == null) {
+                if (offline == null || offline.getUniqueId() == null) {
                     return null;
                 }
 
@@ -84,7 +85,7 @@ public class SessionManager {
         try {
             PlayerProfile profile = LoginSecurity.getDatastore().getProfileRepository().findByUniqueUserIdBlocking(playerId);
             AuthMode authMode = AuthMode.UNAUTHENTICATED;
-            if(profile == null) {
+            if (profile == null) {
                 // New user...
                 profile = createBlankProfile(playerId);
                 authMode = LoginSecurity.getConfiguration().isPasswordRequired() ? AuthMode.UNREGISTERED : AuthMode.AUTHENTICATED;

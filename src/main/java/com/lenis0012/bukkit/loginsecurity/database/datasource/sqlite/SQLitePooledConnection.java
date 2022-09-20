@@ -35,6 +35,7 @@ public class SQLitePooledConnection implements PooledConnection {
 
     /**
      * Constructor.
+     *
      * @param physicalConn The physical Connection.
      */
     protected SQLitePooledConnection(Connection physicalConn) {
@@ -65,60 +66,59 @@ public class SQLitePooledConnection implements PooledConnection {
      * @see javax.sql.PooledConnection#getConnection()
      */
     public Connection getConnection() throws SQLException {
-        if (handleConn != null && !handleConn.isClosed())
+        if (handleConn != null && !handleConn.isClosed()) {
             handleConn.close();
+        }
 
         handleConn = (Connection) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[]{Connection.class},
                 new InvocationHandler() {
-                    boolean isClosed;
+            boolean isClosed;
 
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        try {
-                            String name = method.getName();
-                            if ("close".equals(name)) {
-                                ConnectionEvent event = new ConnectionEvent(SQLitePooledConnection.this);
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                try {
+                    String name = method.getName();
+                    if ("close".equals(name)) {
+                        ConnectionEvent event = new ConnectionEvent(SQLitePooledConnection.this);
 
-                                for (int i = listeners.size() - 1; i >= 0; i--) {
-                                    listeners.get(i).connectionClosed(event);
-                                }
-
-                                if (!physicalConn.getAutoCommit()) {
-                                    physicalConn.rollback();
-                                }
-                                physicalConn.setAutoCommit(true);
-                                isClosed = true;
-
-                                return null; // don't close physical connection
-                            }
-                            else if ("isClosed".equals(name)) {
-                                if (!isClosed)
-                                    isClosed = ((Boolean)method.invoke(physicalConn, args)).booleanValue();
-
-                                return isClosed;
-                            }
-
-                            if (isClosed) {
-                                throw new SQLException ("Connection is closed");
-                            }
-
-                            return method.invoke(physicalConn, args);
+                        for (int i = listeners.size() - 1; i >= 0; i--) {
+                            listeners.get(i).connectionClosed(event);
                         }
-                        catch (SQLException e){
-                            if ("database connection closed".equals(e.getMessage())) {
-                                ConnectionEvent event = new ConnectionEvent(SQLitePooledConnection.this, e);
 
-                                for (int i = listeners.size() - 1; i >= 0; i--) {
-                                    listeners.get(i).connectionErrorOccurred(event);
-                                }
-                            }
-
-                            throw e;
+                        if (!physicalConn.getAutoCommit()) {
+                            physicalConn.rollback();
                         }
-                        catch (InvocationTargetException ex) {
-                            throw ex.getCause();
+                        physicalConn.setAutoCommit(true);
+                        isClosed = true;
+
+                        return null; // don't close physical connection
+                    } else if ("isClosed".equals(name)) {
+                        if (!isClosed) {
+                            isClosed = ((Boolean) method.invoke(physicalConn, args)).booleanValue();
+                        }
+
+                        return isClosed;
+                    }
+
+                    if (isClosed) {
+                        throw new SQLException("Connection is closed");
+                    }
+
+                    return method.invoke(physicalConn, args);
+                } catch (SQLException e) {
+                    if ("database connection closed".equals(e.getMessage())) {
+                        ConnectionEvent event = new ConnectionEvent(SQLitePooledConnection.this, e);
+
+                        for (int i = listeners.size() - 1; i >= 0; i--) {
+                            listeners.get(i).connectionErrorOccurred(event);
                         }
                     }
-                });
+
+                    throw e;
+                } catch (InvocationTargetException ex) {
+                    throw ex.getCause();
+                }
+            }
+        });
 
         return handleConn;
     }

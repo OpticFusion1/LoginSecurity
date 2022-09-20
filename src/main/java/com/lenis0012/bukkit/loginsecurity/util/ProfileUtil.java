@@ -7,12 +7,10 @@ import org.bukkit.entity.Player;
 import java.util.UUID;
 
 /**
- * ProfileUtil is a utility that allows us to get the correct UUID for the player.
- * Minecraft by default gets online player UUID as a case sensitive version of their name.
- * We want all accounts with the same case ignored name to have the same profile.
- * Therefor, if online mode is enabled, we get a corrected version of the UUID.
+ * ProfileUtil is a utility that allows us to get the correct UUID for the player. Minecraft by default gets online player UUID as a case sensitive version of their name. We want all accounts with the same case ignored name to have the same profile. Therefor, if online mode is enabled, we get a corrected version of the UUID.
  */
 public class ProfileUtil {
+
     private static final UserIdMode userIdMode = useOnlineUUID() ? UserIdMode.MOJANG : UserIdMode.OFFLINE;
 
     /**
@@ -42,7 +40,9 @@ public class ProfileUtil {
      * @return Actual UUID
      */
     public static UUID getUUID(String name, UUID fallback) {
-        if(useOnlineUUID()) return fallback;
+        if (useOnlineUUID()) {
+            return fallback;
+        }
         return UUID.nameUUIDFromBytes(("OfflinePlayer:" + name.toLowerCase()).getBytes(Charsets.UTF_8));
     }
 

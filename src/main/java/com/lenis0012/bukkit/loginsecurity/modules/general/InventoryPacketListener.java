@@ -20,15 +20,15 @@ public class InventoryPacketListener extends PacketAdapter {
 
     @Override
     public void onPacketSending(PacketEvent event) {
-        if(!LoginSecurity.getConfiguration().isHideInventory()) {
+        if (!LoginSecurity.getConfiguration().isHideInventory()) {
             return;
         }
 
-        if(event.getPacket().getIntegers().read(0) != 0) {
+        if (event.getPacket().getIntegers().read(0) != 0) {
             return;
         }
 
-        if(LoginSecurity.getSessionManager().getPlayerSession(event.getPlayer()).isAuthorized()) {
+        if (LoginSecurity.getSessionManager().getPlayerSession(event.getPlayer()).isAuthorized()) {
             return;
         }
 

@@ -9,6 +9,7 @@ import org.bukkit.event.HandlerList;
  * When a session's Authentication mode was changed.
  */
 public class AuthModeChangedEvent extends Event {
+
     private static final HandlerList handlers = new HandlerList();
     private final PlayerSession session;
     private final AuthMode previous;

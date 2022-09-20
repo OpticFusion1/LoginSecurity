@@ -16,6 +16,7 @@ import java.util.Map.Entry;
  * This can be any form of reader.
  */
 public class Translation {
+
     private final Map<String, String> translations = Maps.newConcurrentMap();
     private Translation fallback;
     private String name;
@@ -26,7 +27,7 @@ public class Translation {
 
     public Translation(Translation fallback, JsonObject data, String name) throws IOException {
         this.fallback = fallback;
-        for(Entry<String, JsonElement> entry : data.entrySet()) {
+        for (Entry<String, JsonElement> entry : data.entrySet()) {
             translations.put(entry.getKey(), entry.getValue().getAsString());
         }
         this.name = name.split("\\.")[0];
@@ -47,9 +48,9 @@ public class Translation {
      * @return Translation message
      */
     public TranslatedMessage translate(String key) {
-        if(translations.containsKey(key)) {
+        if (translations.containsKey(key)) {
             return new TranslatedMessage(translations.get(key));
-        } else if(fallback != null) {
+        } else if (fallback != null) {
             return fallback.translate(key);
         } else {
             throw new IllegalArgumentException("Unknown translation key \"" + key + "\" for language " + name);

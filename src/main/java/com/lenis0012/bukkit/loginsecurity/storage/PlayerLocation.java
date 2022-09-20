@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 
 public class PlayerLocation {
+
     private int id;
 
     private String world;
@@ -19,7 +20,8 @@ public class PlayerLocation {
 
     private int pitch;
 
-    public PlayerLocation() {}
+    public PlayerLocation() {
+    }
 
     public PlayerLocation(Location location) {
         setWorld(location.getWorld().getName());
@@ -31,12 +33,12 @@ public class PlayerLocation {
     }
 
     public Location asLocation() {
-        if(getWorld() == null) {
+        if (getWorld() == null) {
             return null;
         }
 
         World bukkitWorld = Bukkit.getWorld(getWorld());
-        if(bukkitWorld == null) {
+        if (bukkitWorld == null) {
             return null;
         }
 

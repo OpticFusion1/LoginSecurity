@@ -4,8 +4,7 @@ import com.lenis0012.bukkit.loginsecurity.hashing.BasicAlgorithm;
 import com.lenis0012.bukkit.loginsecurity.hashing.lib.BCryptLib;
 
 /**
- * BCrypt algorithm.
- * A very well known algorithm, it is currently the standard.
+ * BCrypt algorithm. A very well known algorithm, it is currently the standard.
  *
  * Each hash takes about 125ms to generate.
  */

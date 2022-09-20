@@ -7,18 +7,16 @@ import com.lenis0012.bukkit.loginsecurity.database.datasource.sqlite.SQLiteConne
 import com.lenis0012.pluginutils.Module;
 import com.lenis0012.pluginutils.modules.configuration.Configuration;
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
-import lombok.Getter;
 import org.bukkit.Bukkit;
-
 import javax.sql.ConnectionPoolDataSource;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
 public class NewStorageModule extends Module<LoginSecurity> {
+
     private SingleConnectionDataSource dataSource;
     private LoginSecurityDatabase database;
-    @Getter
     private String platform;
 
     public NewStorageModule(LoginSecurity plugin) {
@@ -29,12 +27,14 @@ public class NewStorageModule extends Module<LoginSecurity> {
     public void enable() {
         // Create backup
         final File configFile = new File(plugin.getDataFolder(), "database.yml");
-        if(!configFile.exists()) copyFile(plugin.getResource("database.yml"), configFile);
+        if (!configFile.exists()) {
+            copyFile(plugin.getResource("database.yml"), configFile);
+        }
         final Configuration config = new Configuration(configFile);
         config.reload();
 
         ConnectionPoolDataSource dataSourceConfig;
-        if(config.getBoolean("mysql.enabled")) {
+        if (config.getBoolean("mysql.enabled")) {
             this.platform = "mysql";
             dataSourceConfig = createMysqlDataSource(config);
         } else {
@@ -71,10 +71,11 @@ public class NewStorageModule extends Module<LoginSecurity> {
 
     ConnectionPoolDataSource createSqliteDataSource() {
         File backupFile = new File(plugin.getDataFolder(), "LoginSecurity.db.3.0.backup");
-        if(!backupFile.exists()) {
+        if (!backupFile.exists()) {
             try {
                 copyFile(new FileInputStream(new File(plugin.getDataFolder(), "LoginSecurity.db")), backupFile);
-            } catch (FileNotFoundException e) { }
+            } catch (FileNotFoundException e) {
+            }
         }
 
         SQLiteConnectionPoolDataSource sqliteConfig = new SQLiteConnectionPoolDataSource();
@@ -89,16 +90,20 @@ public class NewStorageModule extends Module<LoginSecurity> {
 
     private void copyFile(InputStream from, File to) {
         try {
-            FileOutputStream output = new FileOutputStream(to);
-            byte[] buffer = new byte[1024];
-            int length;
-            while((length = from.read(buffer)) != -1) {
-                output.write(buffer, 0, length);
+            try (from; FileOutputStream output = new FileOutputStream(to)) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = from.read(buffer)) != -1) {
+                    output.write(buffer, 0, length);
+                }
             }
-            output.close();
-            from.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to copy resource", e);
         }
     }
+
+    public String getPlatform() {
+        return platform;
+    }
+
 }

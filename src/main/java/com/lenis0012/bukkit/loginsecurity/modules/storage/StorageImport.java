@@ -8,7 +8,7 @@ public interface StorageImport extends Runnable {
     boolean isPossible();
 
     static StorageImport fromSourceName(String sourceName, CommandSender sender) {
-        switch(sourceName.toLowerCase()) {
+        switch (sourceName.toLowerCase()) {
             case "loginsecurity":
                 return new LoginSecurityImport((LoginSecurity) LoginSecurity.getInstance(), sender);
             default:

@@ -27,12 +27,12 @@ public class MetaData {
     }
 
     public static <T> T get(Player player, String key, Class<T> type) {
-        if(!player.hasMetadata(key)) {
+        if (!player.hasMetadata(key)) {
             return null;
         }
 
-        for(MetadataValue value : player.getMetadata(key)) {
-            if(value.getOwningPlugin().equals(LoginSecurity.getInstance())) {
+        for (MetadataValue value : player.getMetadata(key)) {
+            if (value.getOwningPlugin().equals(LoginSecurity.getInstance())) {
                 return type.cast(value.value());
             }
         }
