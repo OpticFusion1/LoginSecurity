@@ -6,24 +6,6 @@ Now even ligher and faster than before!
 # Links
 - [SpigotMC](https://www.spigotmc.org/resources/loginsecurity-updated.105385/)
 
-# Changes in 3.0
-* Lightweight download (over 20x smaller than v2.1)
-* Improved performance, resulting in higher tps
-* Removed AutoIn support, consider migrating to FastLogin
-* Removed deprecated hashing algorithms
-* Migrated from mcstats to bstats for statistics
-* Block opening inventory while not logged in
-* Fix errors when using some NPC plugins (like FakePlayers)
-* Add unregister command
-* Change updater message format
-* Fixed bug where some messages are unintentionally hidden from the log
-* Added import command for importing profiles to/from mysql
-* Force users to use exactly the same case-sensitive name every time (#85)
-* Added password confirmation to register command (#67)
-* Added changepassword to admin commands (#104)
-* Improved event handling
-* Allow other plugins to log users in while they are not registered
-
 # Features
 - 6 useful commands to manage your password
 - Light, fast and easy to set up
