@@ -1,11 +1,10 @@
-LoginSecurity 3 [![Build Status](https://ci.codemc.org/job/lenis0012/job/LoginSecurity/badge/icon)](https://ci.codemc.org/job/lenis0012/job/LoginSecurity/)
+LoginSecurity
 =================
 Simple, light, fast and secure user authentication management. Since 2012.  
 Now even ligher and faster than before!
 
 # Links
-- [Development Builds](https://ci.codemc.org/view/Author/job/lenis0012/job/LoginSecurity/)
-- [SpigotMC](https://www.spigotmc.org/resources/loginsecurity.19362/)
+- [SpigotMC](https://www.spigotmc.org/resources/loginsecurity-updated.105385/)
 
 # Changes in 3.0
 * Lightweight download (over 20x smaller than v2.1)
@@ -40,7 +39,7 @@ Now even ligher and faster than before!
 
 # Installation
 ```shell script
-git clone https://github.com/lenis0012/LoginSecurity-2.git LoginSecurity
+git clone https://github.com/OpticFusion1/LoginSecurity.git LoginSecurity
 cd LoginSecurity
 git submodule init
 git submodule update
