@@ -25,6 +25,7 @@ public class CaptchaManager extends Module<LoginSecurity> implements Listener {
     private final Random random = new Random();
     private MapView view;
     private Method setMapIdMethod;
+    private Method setMapViewMethod;
 
     private int mapViewId;
     private boolean failedToLoadMapView = false;
@@ -44,22 +45,27 @@ public class CaptchaManager extends Module<LoginSecurity> implements Listener {
 
         // Load set ID method
         try {
-            setMapIdMethod = MapMeta.class.getMethod("setMapId", int.class);
-            LoginSecurity.getInstance().getLogger().log(Level.INFO, "Using 1.12+ map captcha renderer");
-        } catch (Exception e) {
-        }
+            setMapViewMethod = MapMeta.class.getMethod("setMapView", MapView.class);
+            LoginSecurity.getInstance().getLogger().log(Level.INFO, "Using 1.13+ map captcha renderer");
+        } catch (Exception ignored) {
+            try {
+                setMapIdMethod = MapMeta.class.getMethod("setMapId", int.class);
+                // Get map view ID
+                try {
+                    for(Method method : MapView.class.getMethods()) {
+                        if(!method.getName().equals("getId")) continue;
+                        Object rawMapId = method.invoke(view);
+                        if(rawMapId instanceof Integer) this.mapViewId = (int) rawMapId;
+                        else if(rawMapId instanceof Short) this.mapViewId = (int) (short) rawMapId;
+                        else throw new RuntimeException("Unknown map ID type " + rawMapId.getClass().getName());
+                    }
+                } catch (Exception e) {
+                    LoginSecurity.getInstance().getLogger().log(Level.WARNING, "Failed to load captcha map", e);
+                }
 
-        // Get map view ID
-        try {
-            for(Method method : MapView.class.getMethods()) {
-                if(!method.getName().equals("getId")) continue;
-                Object rawMapId = method.invoke(view);
-                if(rawMapId instanceof Integer) this.mapViewId = (int) rawMapId;
-                else if(rawMapId instanceof Short) this.mapViewId = (int) (short) rawMapId;
-                else throw new RuntimeException("Unknown map ID type " + rawMapId.getClass().getName());
+                LoginSecurity.getInstance().getLogger().log(Level.INFO, "Using legacy 1.12 map captcha renderer");
+            } catch (Exception e) {
             }
-        } catch (Exception e) {
-            LoginSecurity.getInstance().getLogger().log(Level.WARNING, "Failed to load captcha map", e);
         }
     }
 
@@ -74,10 +80,19 @@ public class CaptchaManager extends Module<LoginSecurity> implements Listener {
             return;
         }
 
-        ItemStack item = new ItemStack(Material.MAP, 1, (short) mapViewId);
+        Material itemType = Material.getMaterial("FILLED_MAP");
+        if(itemType == null) itemType = Material.MAP;
+
+        ItemStack item = new ItemStack(itemType, 1, (short) mapViewId);
         ItemMeta meta = item.getItemMeta();
 
-        if(setMapIdMethod != null) {
+        if(setMapViewMethod != null) {
+            try {
+                setMapViewMethod.invoke(meta, view);
+            } catch (Exception e) {
+                LoginSecurity.getInstance().getLogger().log(Level.WARNING, "Failed to set map", e);
+            }
+        } else if(setMapIdMethod != null) {
             try {
                 setMapIdMethod.invoke(meta, mapViewId);
             } catch (Exception e) {
@@ -125,7 +140,9 @@ public class CaptchaManager extends Module<LoginSecurity> implements Listener {
         Runnable callback = MetaData.get(player, "ls_captcha_callback", Runnable.class);
         MetaData.unset(player, "ls_captcha_callback");
         MetaData.unset(player, "ls_captcha_value");
-        player.getInventory().remove(Material.MAP);
+        Material itemType = Material.getMaterial("FILLED_MAP");
+        if(itemType == null) itemType = Material.MAP;
+        player.getInventory().remove(itemType);
         callback.run();
     }
 
